@@ -4,7 +4,7 @@ from graphql.pyutils import is_collection
 from .sync_future import SyncFuture
 
 
-class DataloaderBatchCallbacks:
+class DataloaderBatchCallbacks(import threading.local):
     """
     Singleton that stores all the batched callbacks for all dataloaders. This is
     equivalent to the async `loop.call_soon` functionality and enables the
@@ -27,9 +27,8 @@ class DataloaderBatchCallbacks:
 dataloader_batch_callbacks = DataloaderBatchCallbacks()
 
 
-class SyncDataLoader:
-    def __init__(self, batch_load_fn):
-        self._batch_load_fn = batch_load_fn
+class SyncDataLoader():
+    def __init__(self):
         self._cache = {}
         self._queue = []
 
@@ -55,7 +54,7 @@ class SyncDataLoader:
         self._queue = []
 
         keys = [item[0] for item in queue]
-        values = self._batch_load_fn(keys)
+        values = self.batch_load_fn(keys)
         if not is_collection(values) or len(keys) != len(values):
             raise ValueError("The batch loader does not return an expected result")
 
@@ -70,3 +69,6 @@ class SyncDataLoader:
                 self.clear(key)
                 if not future.done():
                     future.set_exception(error)
+
+    def batch_load_fn(self, keys: list) -> list:
+        raise NotImplementedError()
