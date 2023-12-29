@@ -4,7 +4,7 @@ from graphql.pyutils import is_collection
 from .sync_future import SyncFuture
 
 
-class DataloaderBatchCallbacks(import threading.local):
+class DataloaderBatchCallbacks():
     """
     Singleton that stores all the batched callbacks for all dataloaders. This is
     equivalent to the async `loop.call_soon` functionality and enables the
